@@ -1,0 +1,79 @@
+name: Deploy web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once. `cancel-in-progress: false` so a run that is
+# already mid-publish finishes rather than leaving the site half-swapped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The `jsontolang-wasm` package IS crates/wasm/pkg/, which is generated
+      # and gitignored — `pnpm install` cannot resolve it until wasm-pack has
+      # run. setup.sh is the documented bootstrap that gets that order right,
+      # and it also copies the .wasm and the .lua plugins into apps/web/public.
+      - name: Bootstrap (wasm build, copy artifacts, install)
+        run: bash setup.sh
+
+      # Project Pages serve from /<repo>/, not the domain root. Derived from the
+      # repo name rather than hard-coded so a rename doesn't silently 404.
+      - name: Build site
+        run: pnpm --dir apps/web build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      # Pages returns 404.html for any path with no file behind it. Serving the
+      # app shell from there is what makes a deep link like /playground boot and
+      # hand the URL to the client router instead of showing GitHub's 404.
+      - name: Add SPA fallback and disable Jekyll
+        run: |
+          cp apps/web/dist/index.html apps/web/dist/404.html
+          touch apps/web/dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
