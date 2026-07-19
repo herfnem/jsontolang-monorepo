@@ -1,0 +1,24 @@
+{
+  "name": "reasm-monorepo",
+  "private": true,
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "setup": "bash setup.sh",
+    "wasm": "pnpm --dir crates/wasm build",
+    "watch:wasm": "cargo watch -w crates -s \"pnpm wasm\"",
+    "build": "pnpm wasm && pnpm --dir apps/web build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "@workspace/tsconfig": "workspace:*",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "turbo": "^2.10.4",
+    "typescript": "^6.0.3"
+  }
+}

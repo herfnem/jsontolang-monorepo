@@ -1,0 +1,8 @@
+{
+  "name": "wasm-src",
+  "private": true,
+  "scripts": {
+    "build": "wasm-pack build --target web && mkdir -p ../../apps/web/public && cp pkg/wasm_bg.wasm ../../apps/web/public/wasm_bg.wasm",
+    "dev": "cargo watch -w src -w ../core/src -w ../parser/src -s \"pnpm build\""
+  }
+}

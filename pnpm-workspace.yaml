@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "crates/wasm"
+  - "crates/wasm/pkg"
+  - "packages/*"
+allowBuilds:
+  esbuild: true
