@@ -1,0 +1,13 @@
+{
+  "name": "jsontolang",
+  "short_name": "jsontolang",
+  "description": "Infer a schema from any JSON and generate TypeScript, Rust, or Go types instantly in your browser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+
+  <rect x="96" y="171" width="144" height="144" rx="28" fill="#1e293b"/>
+  <text x="168" y="271" text-anchor="middle"
+        font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="72" font-weight="700" fill="#2dd4bf">{ }</text>
+
+  <text x="272" y="255" font-family="ui-sans-serif, system-ui, Arial, sans-serif"
+        font-size="76" font-weight="700" fill="#f8fafc">jsontolang</text>
+
+  <text x="96" y="360" font-family="ui-sans-serif, system-ui, Arial, sans-serif"
+        font-size="34" fill="#94a3b8">Paste JSON. Get types.</text>
+
+  <text x="96" y="410" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="24" fill="#64748b">TypeScript &#183; Rust &#183; Go &#183; custom Lua plugins</text>
+
+  <text x="96" y="560" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+        font-size="24" fill="#2dd4bf">jsontolang.dev</text>
+</svg>

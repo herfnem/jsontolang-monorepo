@@ -1,15 +1,15 @@
 import type { FC } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
-interface HomeViewProps {
+interface PluginsViewProps {
   className?: string;
 }
 
-export const HomeView: FC<HomeViewProps> = ({ className }) => {
+export const PluginsView: FC<PluginsViewProps> = ({ className }) => {
   return (
     <div className={cn("", className)}>
-      <h1>jsontolang</h1>
-      <p>Paste JSON. Get types.</p>
+      <h1>Plugins</h1>
+      <p>Browse and download language plugins.</p>
     </div>
   );
 };

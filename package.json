@@ -1,5 +1,5 @@
 {
-  "name": "reasm-monorepo",
+  "name": "jsontolang-monorepo",
   "private": true,
   "packageManager": "pnpm@11.5.2",
   "engines": {

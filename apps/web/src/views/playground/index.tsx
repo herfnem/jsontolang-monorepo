@@ -1,15 +1,15 @@
 import type { FC } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 
-interface HomeViewProps {
+interface PlaygroundViewProps {
   className?: string;
 }
 
-export const HomeView: FC<HomeViewProps> = ({ className }) => {
+export const PlaygroundView: FC<PlaygroundViewProps> = ({ className }) => {
   return (
     <div className={cn("", className)}>
-      <h1>jsontolang</h1>
-      <p>Paste JSON. Get types.</p>
+      <h1>Playground</h1>
+      <p>Paste JSON, get types.</p>
     </div>
   );
 };
