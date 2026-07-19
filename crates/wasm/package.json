@@ -1,8 +1,8 @@
 {
-  "name": "wasm-src",
+  "name": "jsontolang-wasm-src",
   "private": true,
   "scripts": {
-    "build": "wasm-pack build --target web && mkdir -p ../../apps/web/public && cp pkg/wasm_bg.wasm ../../apps/web/public/wasm_bg.wasm",
-    "dev": "cargo watch -w src -w ../core/src -w ../parser/src -s \"pnpm build\""
+    "build": "wasm-pack build --target web && mkdir -p ../../apps/web/public && cp pkg/jsontolang_wasm_bg.wasm ../../apps/web/public/jsontolang_wasm_bg.wasm",
+    "dev": "cargo watch -w src -w ../core/src -s \"pnpm build\""
   }
 }

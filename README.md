@@ -1,72 +1,214 @@
-# ReASM Monorepo
+# jsontolang
 
-ReASM is a state-of-the-art interactive IDE, compiler, and CPU virtual machine emulator built with **Rust**, **TypeScript**, **React**, and **WebAssembly**.
+**Paste JSON. Get types.**
 
-This project implements a custom modular virtual machine architecture in Rust and exposes its compiler AST and step-by-step register/memory execution to a rich, hardware-visualized frontend client in the browser.
+`jsontolang` reads JSON, infers a schema, and renders type definitions for a target language — TypeScript, Rust, Go, or a custom Lua plugin of your own.
+
+It ships as three surfaces over one core:
+
+| Surface | Status | What it is |
+|---|---|---|
+| **CLI** (`crates/cli`) | available | The full tool. File / stdin / inline input, rendered through sandboxed Lua plugins, including any you write. |
+| **Web** (`apps/web`) | available | Landing page, plugin showcase, and a playground that runs the schema inference in your browser via WebAssembly. |
+| **TUI** | planned | An interactive terminal front end. Not built — the crate layout leaves room for it. |
 
 ---
 
-## 🏗️ Monorepo Architecture
+## Monorepo architecture
 
-The repository is structured as a combined **Cargo workspace** and **pnpm workspace** for seamless integration of Rust modules and web applications:
+A combined **Cargo workspace** and **pnpm workspace**:
 
 ```text
-reasm/
-├── Cargo.toml                 # Rust Workspace configuration
-├── package.json               # pnpm Workspace configuration
-├── pnpm-workspace.yaml        # Workspace targets (React app & WASM package)
-├── tsconfig.base.json         # Shared TypeScript compiler options
+jsontolang-monorepo/
+├── Cargo.toml                 # Cargo workspace
+├── pnpm-workspace.yaml        # pnpm workspace (apps/*, crates/wasm, crates/wasm/pkg, packages/*)
+├── scripts/check.sh           # single source of truth for "passing"
+│
+├── crates/
+│   ├── core/                  # "jsontolang-core" — schema inference + native renderers.
+│   │                          #   Pure: no I/O, no mlua, builds for wasm32.
+│   ├── cli/                   # "jsontolang" — the binary. Lua plugin discovery + CLI I/O.
+│   └── wasm/                  # "jsontolang-wasm" — wasm-bindgen glue over core.
+│       └── pkg/               #   wasm-pack output; the JS package the app imports (generated, gitignored)
 │
 ├── apps/
-│   └── web/                   # Vite + React + TypeScript visualizer client
+│   └── web/                   # Vite + React 19 + TanStack Router
 │
-└── crates/
-    ├── parser/                # Rust assembly syntax parser (independent)
-    ├── core/                  # Rust CPU virtual machine & emulator (independent)
-    └── wasm/                  # WebAssembly adapter (JS/TS glue layer)
+└── packages/
+    ├── ui/                    # "@workspace/ui" — shared shadcn / Base UI primitives
+    ├── tsconfig/              # shared tsconfig bases
+    └── eslint-config/         # shared flat ESLint config
 ```
 
-This clean separation allows `crates/parser` and `crates/core` to be reusable in native CLIs, desktop applications (like Tauri), or backend web services without modifications.
+`jsontolang-core` depends on nothing but `serde`/`serde_json`/`anyhow`, so the CLI, the browser build, and a future TUI all reuse the same inference without modification.
+
+### Why rendering exists twice
+
+The CLI renders through Lua plugins (`crates/cli/plugins/*.lua`, executed by `mlua`). The browser renders through native Rust (`crates/core/src/render/*.rs`). Same output, two implementations.
+
+This is deliberate: `mlua` vendors C Lua through a `cc` build script and does not target `wasm32-unknown-unknown`, and the CLI's output must stay byte-identical to what it produced before the monorepo. `crates/cli/tests/render_parity.rs` renders a corpus of adversarial inputs through **both** implementations and asserts they match byte for byte, so the two cannot drift silently. See `docs/jsontolang-monorepo-plan.md` for the full rationale and the upgrade path.
 
 ---
 
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
-* [Node.js](https://nodejs.org/) (`^20.19.0 || >=22.12.0` — Vite 8 requirement)
-* [pnpm](https://pnpm.io/) (>= 11 — repo pins `pnpm@11.13.0`, honored automatically via Corepack)
-* [Rust toolchain](https://rustup.rs/) (stable)
-* [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
-* `cargo-watch` — only for the WASM watch task: `cargo install cargo-watch`
 
-### First run (fresh clone)
+* [Rust toolchain](https://rustup.rs/) (stable)
+* [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) — `cargo install wasm-pack`
+* [Node.js](https://nodejs.org/) `^20.19.0 || >=22.12.0` (Vite 8 requirement)
+* [pnpm](https://pnpm.io/) >= 11 (the repo pins `pnpm@11.5.2`, honored via Corepack)
+* `cargo-watch` — only for `pnpm watch:wasm`: `cargo install cargo-watch`
+
+Only the Rust toolchain is needed to build or use the CLI.
+
+### The CLI alone
+
+```bash
+cargo run -p jsontolang -- --lang typescript --json '{"name":"Neko"}'
+```
+
+### The web app (fresh clone)
 
 Run the bootstrap script **before anything else**:
 
 ```bash
-bash setup.sh         # build WASM pkg → copy wasm_bg.wasm → pnpm install
-pnpm dev              # run the reader (turbo)
+bash setup.sh         # build WASM pkg → copy artifacts into apps/web/public → pnpm install
+pnpm dev              # run the app (turbo)
 ```
 
-**Do not start with `pnpm install`.** The `wasm` workspace package is `crates/wasm/pkg/` — generated by `wasm-pack` and gitignored, so it is absent on a fresh clone. Without it, `pnpm install` fails to resolve `wasm@workspace:*`:
+**Do not start with `pnpm install`.** The `jsontolang-wasm` workspace package *is* `crates/wasm/pkg/` — generated by `wasm-pack` and gitignored, so it is absent on a fresh clone. Without it, `pnpm install` fails:
 
 ```
-[ERR_PNPM_WORKSPACE_PKG_NOT_FOUND] "wasm@workspace:*" is in the dependencies but no package named "wasm" is present in the workspace
+[ERR_PNPM_WORKSPACE_PKG_NOT_FOUND] "jsontolang-wasm@workspace:*" is in the dependencies but no package named "jsontolang-wasm" is present in the workspace
 ```
 
-`setup.sh` builds `pkg/` first, then installs. It must run **directly** (`bash setup.sh`) — not via `pnpm run setup` — because pnpm 11 runs a deps-verify (`pnpm install`) before every script and would hit the same wall.
+`setup.sh` builds `pkg/` first, then installs. It must run **directly** (`bash setup.sh`), not via `pnpm run setup` — pnpm 11 runs a deps-verify before every script and would hit the same wall.
 
-### Everyday commands (after the first run)
+### Everyday commands
 
 ```bash
 pnpm wasm             # rebuild the WASM package after Rust changes
 pnpm watch:wasm       # rebuild WASM on any Rust change (needs cargo-watch)
-pnpm dev              # run the reader (turbo)
-pnpm build            # production build (all workspaces)
-pnpm lint             # lint (all workspaces)
-cargo test --workspace                     # Rust unit tests
-cargo clippy --workspace --all-targets     # Rust lints
+pnpm dev              # run the app (turbo)
+pnpm build            # production build (wasm, then the app)
+pnpm lint             # lint all workspaces
+pnpm check            # everything CI runs (scripts/check.sh)
+
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-> **Building the WASM needs `wasm-pack`** — a Rust toolchain (Cargo) alone is not enough. If it is missing, install it with `cargo install wasm-pack`, then re-run `bash setup.sh`.
+---
 
+## CLI usage
+
+```bash
+jsontolang --lang <LANG> [--root Root] (--json <JSON> | --file <PATH> | --stdin)
+```
+
+Built-in languages: `typescript`, `rust`, `go`.
+
+Exactly one input source is required: `--json`, `--file`, or `--stdin`.
+
+```bash
+# Inline JSON
+cargo run -p jsontolang -- --lang typescript --json '{"name":"Neko"}'
+
+# Read from a file
+cargo run -p jsontolang -- --lang rust --file ./example.json
+
+# Read from stdin
+printf '{"name":"Neko"}' | cargo run -p jsontolang -- --lang go --stdin
+```
+
+`--root` controls the generated root type name and defaults to `Root`.
+
+## How it works
+
+```text
+input -> schema IR -> renderer -> output
+```
+
+1. `crates/cli/src/input.rs` reads JSON from `--file`, `--stdin`, or `--json`.
+2. `crates/core/src/schema.rs` converts the `serde_json::Value` into a schema IR: `Document`, `NamedType`, `Field`, `TypeExpr`.
+3. `crates/cli/src/plugins/mod.rs` discovers the available plugins and selects the one whose `key()` matches `--lang`.
+4. The plugin (a sandboxed Lua script) renders the `Document` into language-specific source text.
+5. `crates/cli/src/main.rs` prints the result to stdout.
+
+The entry point for that pipeline is `run` in `crates/cli/src/lib.rs`. In the browser, steps 3–5 are replaced by `jsontolang_core::render`, called from `crates/wasm/src/lib.rs`.
+
+## Adding a plugin
+
+Plugins are `.lua` files, not Rust code. `--lang` is a free string matched against whatever plugin keys get discovered at startup — there is no compiled enum to extend.
+
+### Where plugins come from
+
+`crates/cli/src/plugins/mod.rs` looks for plugin scripts in, in order:
+
+1. `$XDG_CONFIG_HOME/jsontolang/plugins/*.lua`, or `~/.config/jsontolang/plugins/*.lua` if `XDG_CONFIG_HOME` is unset or empty.
+2. If that directory doesn't exist, or exists but contains no usable `.lua` files, the 3 embedded defaults (`typescript`, `rust`, `go`) are used instead.
+
+These two sources are never merged: if the plugin directory has at least one usable `.lua` file, only the plugins in that directory are available.
+
+### The plugin file contract
+
+A plugin `.lua` file must, as its last statement, return a table with a `key` string and a `render` function:
+
+```lua
+return {
+  key = "typescript",
+  render = function(document)
+    -- build a string from `document` and return it
+    return "..."
+  end,
+}
+```
+
+- `key` is the string `--lang` is matched against.
+- `render(document)` receives the inferred schema as a Lua table and must return a single string — the full generated source text. The shape of `document` is:
+  - `document.root_name` — string, the root type's name.
+  - `document.root` — a `ty` (see below) describing the root value.
+  - `document.types` — an array of named types, each `{ name, fields }`, where `fields` is an array of `{ name, ty, optional }`.
+  - a `ty` is a table with a `kind` field: `"any"`, `"bool"`, `"integer"`, `"unsigned_integer"`, `"float"`, `"string"`, `"named"` (has a `.name`), or `"array"` (has an `.item`, itself a `ty`).
+
+See `crates/cli/plugins/typescript.lua` for a complete example.
+
+### Sandboxing
+
+Plugin scripts run in a restricted Lua environment (`crates/cli/src/plugins/lua_plugin.rs`): only the `string`, `table`, and `math` standard libraries are loaded (`io`, `os`, `package`, `debug`, and `coroutine` are not), and `dofile`/`loadfile`/`load` are explicitly nil'd out even though they are normally base-library globals. A plugin has no filesystem, process, or OS access — it can only transform the `document` table into a string.
+
+Because that sandbox is `mlua`, custom plugins are **CLI-only**. The browser playground offers the three built-in languages, rendered natively.
+
+### Error handling
+
+If a `.lua` file fails to load — syntax error, or a missing/malformed `key`/`render` — it is skipped with a warning on stderr, and loading continues with the other plugins in the directory.
+
+### If you add or change a plugin
+
+Update, in the same change:
+
+1. The `.lua` file in `crates/cli/plugins/`.
+2. Its native twin in `crates/core/src/render/` (otherwise `render_parity.rs` fails).
+3. `BUILTIN_LANGS` in `crates/core/src/render/mod.rs` and `LANGUAGES` in `apps/web/src/types/jsontolang.ts` for a new language.
+4. `BUILTIN_PLUGINS` in `apps/web/src/libs/plugins.ts` so it shows on `/plugins`.
+5. Coverage in `crates/cli/tests/plugin_output.rs` and `crates/core/tests/render.rs`.
+
+---
+
+## Build, lint, and release
+
+`scripts/check.sh` is the single source of truth for "passing": `cargo build`, `cargo test`, `cargo clippy -D warnings`, `cargo fmt --check`, Lua linting (`luacheck`, falling back to `luac -p`), then the WASM build and the web app's typecheck / lint / build. Run it with `pnpm check` or `./scripts/check.sh`.
+
+`.github/workflows/ci.yml` runs it on every push and pull request to `main`.
+
+### Releasing
+
+`.github/workflows/release.yml` runs on any pushed tag matching `v*.*.*`. It re-runs `scripts/check.sh` as a gate, then builds a release binary and publishes a GitHub Release with `jsontolang` plus `plugins/{typescript,rust,go}.lua` bundled in a `.tar.gz`.
+
+```bash
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+Use the version from `crates/cli/Cargo.toml`. The workflow needs no secrets — it uses the repo's built-in `GITHUB_TOKEN`.

@@ -8,7 +8,8 @@
       "outputs": [
         "dist/**",
         "pkg/**",
-        "public/wasm_bg.wasm"
+        "public/jsontolang_wasm_bg.wasm",
+        "public/lua/**"
       ]
     },
     "lint": {

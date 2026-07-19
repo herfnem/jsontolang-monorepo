@@ -2,11 +2,12 @@ import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Nav } from "@/components/nav";
+import { canonical, SITE_NAME } from "@/libs/site";
 
-const SITE_NAME = "jsontolang";
 const DESCRIPTION =
   "Infer a schema from any JSON and generate TypeScript, Rust, or Go types instantly in your browser, powered by WASM.";
-const OG_IMAGE = "/og-image.png";
+// Absolute: crawlers and social scrapers don't resolve relative OG images.
+const OG_IMAGE = canonical("/og-image.png");
 
 export const Route = createRootRoute({
   head: () => ({

@@ -1,15 +1,16 @@
 {
-  "name": "web",
+  "name": "jsontolang-web",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "pnpm sync:plugins && vite",
+    "build": "pnpm sync:plugins && tsc -b && vite build",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:plugins": "mkdir -p public/lua && cp ../../crates/cli/plugins/*.lua public/lua/"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -17,6 +18,7 @@
     "@tanstack/react-router": "^1.170.18",
     "@tanstack/react-router-devtools": "^1.167.0",
     "@workspace/ui": "workspace:*",
+    "jsontolang-wasm": "workspace:*",
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -42,4 +44,3 @@
     "vite": "^8.1.4"
   }
 }
-

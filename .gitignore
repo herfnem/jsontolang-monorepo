@@ -13,7 +13,8 @@ crates/wasm/pkg/
 
 # Production build distributions
 dist/
-/apps/web/public/wasm_bg.wasm
+/apps/web/public/jsontolang_wasm_bg.wasm
+/apps/web/public/lua/
 
 # OS files
 .DS_Store
@@ -27,6 +28,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
-
-# custom
-/jsontox

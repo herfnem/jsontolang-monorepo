@@ -9,10 +9,12 @@
   "scripts": {
     "setup": "bash setup.sh",
     "wasm": "pnpm --dir crates/wasm build",
-    "watch:wasm": "cargo watch -w crates -s \"pnpm wasm\"",
+    "watch:wasm": "cargo watch -w crates/core/src -w crates/wasm/src -s \"pnpm wasm\"",
     "build": "pnpm wasm && pnpm --dir apps/web build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "check": "bash scripts/check.sh"
   },
   "devDependencies": {
     "@workspace/tsconfig": "workspace:*",
