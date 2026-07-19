@@ -1,22 +1,14 @@
 import type { FC } from "react";
 import { Link } from "@tanstack/react-router";
+import { Globe, SquareTerminal, Terminal } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { TAGLINE } from "@/libs/site";
 import { CodeBlock } from "./components/code-block";
+import { LiveDemo } from "./components/live-demo";
 import { SurfaceCard } from "./components/surface-card";
 
-const EXAMPLE_JSON = `{
-  "id": 1,
-  "name": "Neko",
-  "tags": ["cat", "small"]
-}`;
-
-const EXAMPLE_TYPESCRIPT = `export interface Root {
-  id: number;
-  name: string;
-  tags: string[];
-}`;
+const BADGES = ["Rust, compiled to WebAssembly", "Nothing leaves your browser"] as const;
 
 interface HomeViewProps {
   className?: string;
@@ -25,37 +17,63 @@ interface HomeViewProps {
 export const HomeView: FC<HomeViewProps> = ({ className }) => {
   return (
     <main className={cn("mx-auto w-full max-w-5xl px-6 pb-24", className)}>
-      <section className="py-16 sm:py-24">
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{TAGLINE}</h1>
+      <section className="relative overflow-hidden py-16 sm:py-24">
+        <div
+          aria-hidden
+          className="bg-primary/25 pointer-events-none absolute top-0 left-1/2 -z-10 size-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          {BADGES.map((badge) => (
+            <span
+              key={badge}
+              className="border-border text-muted-foreground rounded-full border px-3 py-1 text-xs"
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+
+        <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">{TAGLINE}</h1>
         <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-relaxed">
           jsontolang infers a schema from any JSON and generates matching type definitions for
           TypeScript, Rust, Go, or a custom Lua plugin of your own. One core, three surfaces.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button render={<Link to="/playground" />}>Open the playground</Button>
-          <Button variant="outline" render={<Link to="/plugins" />}>
+          <Button nativeButton={false} render={<Link to="/playground" />}>
+            Open the playground
+          </Button>
+          <Button nativeButton={false} variant="outline" render={<Link to="/plugins" />}>
             Browse plugins
           </Button>
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <CodeBlock label="input.json">{EXAMPLE_JSON}</CodeBlock>
-        <CodeBlock label="--lang typescript">{EXAMPLE_TYPESCRIPT}</CodeBlock>
+      <section>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-2xl font-semibold tracking-tight">Try it right here</h2>
+          <Link
+            to="/playground"
+            className="text-muted-foreground hover:text-foreground text-sm whitespace-nowrap underline-offset-4 hover:underline"
+          >
+            Open full playground →
+          </Link>
+        </div>
+        <LiveDemo className="mt-6" />
       </section>
 
       <section className="py-16">
         <h2 className="text-2xl font-semibold tracking-tight">Three surfaces, one core</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <SurfaceCard title="CLI" status="available">
+          <SurfaceCard title="CLI" status="available" icon={<Terminal />}>
             The full tool. Reads from a file, stdin, or an inline string, and renders through
             sandboxed Lua plugins — including any you write yourself.
           </SurfaceCard>
-          <SurfaceCard title="Web" status="you are here">
+          <SurfaceCard title="Web" status="you are here" icon={<Globe />} current>
             The playground runs the same schema inference compiled to WebAssembly. Nothing is
             uploaded; every keystroke is rendered in your browser.
           </SurfaceCard>
-          <SurfaceCard title="TUI" status="planned">
+          <SurfaceCard title="TUI" status="planned" icon={<SquareTerminal />}>
             An interactive terminal front end over the same core. Not built yet — the crate layout
             already leaves room for it.
           </SurfaceCard>

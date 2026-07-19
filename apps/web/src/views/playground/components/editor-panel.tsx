@@ -11,14 +11,14 @@ interface EditorPanelProps {
 
 export const EditorPanel: FC<EditorPanelProps> = ({ title, actions, children, className }) => {
   return (
-    <section className={cn("border-border bg-card flex flex-col rounded-lg border", className)}>
+    <section className={cn("flex h-full min-h-0 flex-col overflow-hidden", className)}>
       <header className="border-border flex h-11 shrink-0 items-center justify-between gap-3 border-b px-3">
         <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           {title}
         </h2>
         {actions}
       </header>
-      {children}
+      <div className="min-h-0 flex-1">{children}</div>
     </section>
   );
 };

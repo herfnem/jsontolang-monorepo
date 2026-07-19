@@ -26,10 +26,12 @@ export const Route = createRootRoute({
 
 function RootLayout() {
   return (
-    <>
+    <div className="flex h-svh flex-col overflow-hidden">
       <HeadContent />
       <Nav />
-      <Outlet />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <Outlet />
+      </div>
       <TanStackDevtools
         plugins={[
           {
@@ -40,6 +42,6 @@ function RootLayout() {
           // { name: "EPUB Engine", render: <EpubDevtoolsPanel /> },
         ]}
       />
-    </>
+    </div>
   );
 }

@@ -28,7 +28,12 @@ export const PluginCard: FC<PluginCardProps> = ({ plugin, className }) => {
       </pre>
 
       <footer className="mt-4 flex items-center gap-3">
-        <Button size="sm" variant="outline" render={<a href={href} download={plugin.file} />}>
+        <Button
+          size="sm"
+          variant="outline"
+          nativeButton={false}
+          render={<a href={href} download={plugin.file} />}
+        >
           Download {plugin.file}
         </Button>
         <a

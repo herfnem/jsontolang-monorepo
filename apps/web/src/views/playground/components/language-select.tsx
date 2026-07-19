@@ -1,5 +1,11 @@
 import type { FC } from "react";
-import { cn } from "@workspace/ui/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { isLanguage, type Language } from "@/types/jsontolang";
 
 interface LanguageSelectProps {
@@ -16,25 +22,22 @@ export const LanguageSelect: FC<LanguageSelectProps> = ({
   className,
 }) => {
   return (
-    <label className="flex items-center gap-2">
-      <span className="sr-only">Target language</span>
-      <select
-        value={value}
-        onChange={(event) => {
-          const next = event.target.value;
-          if (isLanguage(next)) onChange(next);
-        }}
-        className={cn(
-          "border-border bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-7 rounded-md border px-2 text-sm outline-none focus-visible:ring-3",
-          className,
-        )}
-      >
+    <Select
+      value={value}
+      onValueChange={(next) => {
+        if (next !== null && isLanguage(next)) onChange(next);
+      }}
+    >
+      <SelectTrigger className={className}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
         {languages.map((language) => (
-          <option key={language} value={language}>
+          <SelectItem key={language} value={language}>
             {language}
-          </option>
+          </SelectItem>
         ))}
-      </select>
-    </label>
+      </SelectContent>
+    </Select>
   );
 };
