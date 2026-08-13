@@ -237,7 +237,7 @@ Update, in the same change:
 
 ### Releasing
 
-`.github/workflows/release.yml` runs on any pushed tag matching `v*.*.*`. It re-runs `scripts/check.sh` as a gate, then builds release binaries and publishes a GitHub Release with two `.tar.gz`s: `jsontolang` plus `plugins/{typescript,rust,go}.lua`, and `jsontolang-tui` on its own (it has no plugins to bundle).
+`.github/workflows/release.yml` runs on any pushed tag matching `v*.*.*`. It re-runs `scripts/check.sh` as a gate, then cross-builds for `x86_64-unknown-linux-gnu`, `aarch64-apple-darwin`, and `x86_64-apple-darwin`, and publishes a GitHub Release with two `.tar.gz`s per platform: `jsontolang` plus `plugins/{typescript,rust,go}.lua`, and `jsontolang-tui` on its own (it has no plugins to bundle).
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
