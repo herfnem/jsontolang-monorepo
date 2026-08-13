@@ -10,7 +10,7 @@ It ships as three surfaces over one core:
 |---|---|---|
 | **CLI** (`crates/cli`) | available | The full tool. File / stdin / inline input, rendered through sandboxed Lua plugins, including any you write. |
 | **Web** (`apps/web`) | available | Landing page, plugin showcase, and a playground that runs the schema inference in your browser via WebAssembly. |
-| **TUI** | planned | An interactive terminal front end. Not built — the crate layout leaves room for it. |
+| **TUI** (`crates/tui`) | available | Two-pane terminal front end — JSON on the left, generated types on the right — rendered natively through `jsontolang-core`, same as the web playground. |
 
 ---
 
@@ -28,6 +28,7 @@ jsontolang-monorepo/
 │   ├── core/                  # "jsontolang-core" — schema inference + native renderers.
 │   │                          #   Pure: no I/O, no mlua, builds for wasm32.
 │   ├── cli/                   # "jsontolang" — the binary. Lua plugin discovery + CLI I/O.
+│   ├── tui/                   # "jsontolang-tui" — ratatui two-pane terminal front end over core.
 │   └── wasm/                  # "jsontolang-wasm" — wasm-bindgen glue over core.
 │       └── pkg/               #   wasm-pack output; the JS package the app imports (generated, gitignored)
 │
@@ -40,7 +41,7 @@ jsontolang-monorepo/
     └── eslint-config/         # shared flat ESLint config
 ```
 
-`jsontolang-core` depends on nothing but `serde`/`serde_json`/`anyhow`, so the CLI, the browser build, and a future TUI all reuse the same inference without modification.
+`jsontolang-core` depends on nothing but `serde`/`serde_json`/`anyhow`, so the CLI, the browser build, and the TUI all reuse the same inference without modification.
 
 ### Why rendering exists twice
 
@@ -124,6 +125,38 @@ printf '{"name":"Neko"}' | cargo run -p jsontolang -- --lang go --stdin
 
 `--root` controls the generated root type name and defaults to `Root`.
 
+## TUI usage
+
+```bash
+cargo run -p jsontolang-tui
+```
+
+Two panes: JSON on the left, generated types on the right. The right pane re-renders on every keystroke in the left pane. The help line at the bottom, and the left pane's title bar, change depending on which pane and mode you're in.
+
+The left pane is a small vim emulation with Normal and Insert modes (the right pane is read-only and always navigation-only, no modes). It starts in Normal mode — press `i` before typing.
+
+| Key | Action | Mode / pane |
+|---|---|---|
+| `Tab` | Switch focus between panes | any |
+| `Esc` | Back to Normal mode, or quit if already in Normal mode / on the right pane | any |
+| `i` / `a` | Insert before / after the cursor | left, Normal |
+| `I` / `A` | Insert at line start / end | left, Normal |
+| `o` / `O` | Open a new line below / above, insert | left, Normal |
+| `h` `j` `k` `l` (or arrows) | Move the cursor | left Normal, or right (scroll) |
+| `gg` / `G` | Jump to top / bottom | left Normal, or right (scroll) |
+| `x` | Delete the character under the cursor | left, Normal |
+| `dd` | Delete (and yank) the current line | left, Normal |
+| `yy` | Yank the current line | left, Normal |
+| `p` / `P` | Paste the yanked line(s) below / above the cursor | left, Normal |
+| `u` | Undo | left, Normal |
+| `L` | Cycle the output language (`typescript` → `rust` → `go`) | left Normal, or right |
+| `=` | Beautify (pretty-print) the left pane's JSON | left Normal, or right |
+| `m` | Minify the left pane's JSON | left Normal, or right |
+| `Y` | Copy the focused pane's content to the system clipboard | left Normal, or right |
+| `R` | Paste the system clipboard into the left pane, replacing its content | left Normal, or right |
+
+`p`/`P`/`yy`/`dd` use an internal yank register (line-based, like vim), separate from `Y`/`R`, which go through the OS clipboard and replace the whole left pane. None of these bindings use `Ctrl`, `Alt`, or function keys — those are commonly intercepted by terminals and multiplexers before they ever reach the app (`Ctrl+Tab` in particular). Plain letters are only safe as commands outside Insert mode, which is why `L`/`=`/`m`/`Y`/`R` don't work while actively typing — drop to Normal mode (`Esc`) first. Renders through `jsontolang_core::render` directly — the same built-in languages as the web playground, no Lua plugins.
+
 ## How it works
 
 ```text
@@ -136,7 +169,7 @@ input -> schema IR -> renderer -> output
 4. The plugin (a sandboxed Lua script) renders the `Document` into language-specific source text.
 5. `crates/cli/src/main.rs` prints the result to stdout.
 
-The entry point for that pipeline is `run` in `crates/cli/src/lib.rs`. In the browser, steps 3–5 are replaced by `jsontolang_core::render`, called from `crates/wasm/src/lib.rs`.
+The entry point for that pipeline is `run` in `crates/cli/src/lib.rs`. In the browser and the TUI, steps 3–5 are replaced by `jsontolang_core::render`, called from `crates/wasm/src/lib.rs` and `crates/tui/src/main.rs` respectively.
 
 ## Adding a plugin
 
@@ -204,7 +237,7 @@ Update, in the same change:
 
 ### Releasing
 
-`.github/workflows/release.yml` runs on any pushed tag matching `v*.*.*`. It re-runs `scripts/check.sh` as a gate, then builds a release binary and publishes a GitHub Release with `jsontolang` plus `plugins/{typescript,rust,go}.lua` bundled in a `.tar.gz`.
+`.github/workflows/release.yml` runs on any pushed tag matching `v*.*.*`. It re-runs `scripts/check.sh` as a gate, then builds release binaries and publishes a GitHub Release with two `.tar.gz`s: `jsontolang` plus `plugins/{typescript,rust,go}.lua`, and `jsontolang-tui` on its own (it has no plugins to bundle).
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"

@@ -54,8 +54,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build release binary
-        run: cargo build --release -p jsontolang
+      - name: Build release binaries
+        run: cargo build --release -p jsontolang -p jsontolang-tui
 
       - name: Package
         run: |
@@ -64,6 +64,8 @@ jobs:
             -C target/release jsontolang \
             -C "$GITHUB_WORKSPACE/crates/cli" \
             plugins/typescript.lua plugins/rust.lua plugins/go.lua
+          tar -czf "dist/jsontolang-tui-${{ github.ref_name }}-x86_64-linux.tar.gz" \
+            -C target/release jsontolang-tui
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
