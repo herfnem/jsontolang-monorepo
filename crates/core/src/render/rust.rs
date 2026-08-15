@@ -29,7 +29,11 @@ const RUST_KEYWORDS: &[&str] = &[
 /// type — a trailing `pub type` alias for the root.
 pub fn render(document: &Document) -> String {
     let type_names = allocate_type_names(document);
-    let mut out = String::from("use serde::{Deserialize, Serialize};\n\n");
+    let mut out = String::from("use serde::{Deserialize, Serialize};\n");
+    if document_uses_map(document) {
+        out.push_str("use std::collections::HashMap;\n");
+    }
+    out.push('\n');
 
     for named in &document.types {
         render_named_type(named, &type_names, &mut out);
@@ -92,7 +96,26 @@ fn render_type(ty: &TypeExpr, type_names: &TypeNames<'_>) -> String {
         TypeExpr::String => "String".to_string(),
         TypeExpr::Named { name } => render_named_type_name(name, type_names),
         TypeExpr::Array { item } => format!("Vec<{}>", render_type(item, type_names)),
+        TypeExpr::Map { value } => format!("HashMap<String, {}>", render_type(value, type_names)),
+        TypeExpr::Nullable { of } => format!("Option<{}>", render_type(of, type_names)),
     }
+}
+
+fn type_uses_map(ty: &TypeExpr) -> bool {
+    match ty {
+        TypeExpr::Map { .. } => true,
+        TypeExpr::Array { item } => type_uses_map(item),
+        TypeExpr::Nullable { of } => type_uses_map(of),
+        _ => false,
+    }
+}
+
+fn document_uses_map(document: &Document) -> bool {
+    type_uses_map(&document.root)
+        || document
+            .types
+            .iter()
+            .any(|named| named.fields.iter().any(|field| type_uses_map(&field.ty)))
 }
 
 /// Maps a type's *raw* (unsanitized) schema name to its allocated identifier.

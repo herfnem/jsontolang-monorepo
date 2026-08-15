@@ -592,3 +592,124 @@ fn excludes_orphan_named_types_after_mixed_shape_field_merge() {
         }
     );
 }
+
+#[test]
+fn wraps_fields_that_are_sometimes_null_in_nullable() {
+    let document = infer_document(
+        "Owner",
+        &json!({
+            "pets": [
+                { "nickname": "Mochi" },
+                { "nickname": null }
+            ]
+        }),
+    )
+    .unwrap();
+
+    assert_eq!(
+        document,
+        Document {
+            root_name: "Owner".into(),
+            root: TypeExpr::Named {
+                name: "Owner".into()
+            },
+            types: vec![
+                NamedType {
+                    name: "Owner".into(),
+                    fields: vec![Field {
+                        name: "pets".into(),
+                        ty: TypeExpr::Array {
+                            item: Box::new(TypeExpr::Named {
+                                name: "OwnerPetsItem".into()
+                            }),
+                        },
+                        optional: false,
+                    }],
+                },
+                NamedType {
+                    name: "OwnerPetsItem".into(),
+                    fields: vec![Field {
+                        name: "nickname".into(),
+                        ty: TypeExpr::Nullable {
+                            of: Box::new(TypeExpr::String)
+                        },
+                        optional: false,
+                    }],
+                },
+            ],
+        }
+    );
+}
+
+#[test]
+fn wraps_nullable_array_items() {
+    let document = infer_document("Root", &json!({ "tags": ["a", null, "b"] })).unwrap();
+
+    assert_eq!(
+        document,
+        Document {
+            root_name: "Root".into(),
+            root: TypeExpr::Named {
+                name: "Root".into()
+            },
+            types: vec![NamedType {
+                name: "Root".into(),
+                fields: vec![Field {
+                    name: "tags".into(),
+                    ty: TypeExpr::Array {
+                        item: Box::new(TypeExpr::Nullable {
+                            of: Box::new(TypeExpr::String)
+                        }),
+                    },
+                    optional: false,
+                }],
+            }],
+        }
+    );
+}
+
+#[test]
+fn infers_maps_from_all_numeric_keys() {
+    let document =
+        infer_document("Root", &json!({ "scores": { "1": 10, "2": 20, "3": 30 } })).unwrap();
+
+    assert_eq!(
+        document,
+        Document {
+            root_name: "Root".into(),
+            root: TypeExpr::Named {
+                name: "Root".into()
+            },
+            types: vec![NamedType {
+                name: "Root".into(),
+                fields: vec![Field {
+                    name: "scores".into(),
+                    ty: TypeExpr::Map {
+                        value: Box::new(TypeExpr::Integer)
+                    },
+                    optional: false,
+                }],
+            }],
+        }
+    );
+}
+
+#[test]
+fn infers_maps_from_many_same_shaped_properties() {
+    let mut props = serde_json::Map::new();
+    for i in 0..25 {
+        props.insert(format!("key_{i}"), json!(i));
+    }
+    let document = infer_document("Root", &serde_json::Value::Object(props)).unwrap();
+
+    assert_eq!(
+        document,
+        Document {
+            root_name: "Root".into(),
+            root: TypeExpr::Map {
+                value: Box::new(TypeExpr::Integer)
+            },
+            types: vec![],
+        }
+    );
+}

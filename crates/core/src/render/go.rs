@@ -160,15 +160,40 @@ fn render_type(ty: &TypeExpr) -> String {
         TypeExpr::String => "string".to_string(),
         TypeExpr::Named { name } => render_type_name(name),
         TypeExpr::Array { item } => format!("[]{}", render_type(item)),
+        TypeExpr::Map { value } => format!("map[string]{}", render_type(value)),
+        // Only value types need a pointer to carry `null`; slices, maps and
+        // `interface{}` are already nilable.
+        TypeExpr::Nullable { of } => {
+            let inner = render_type(of);
+            if is_value_type(of) {
+                format!("*{inner}")
+            } else {
+                inner
+            }
+        }
     }
 }
 
+fn is_value_type(ty: &TypeExpr) -> bool {
+    matches!(
+        ty,
+        TypeExpr::Bool
+            | TypeExpr::Integer
+            | TypeExpr::UnsignedInteger
+            | TypeExpr::Float
+            | TypeExpr::String
+            | TypeExpr::Named { .. }
+    )
+}
+
 /// Optional fields become pointers so a missing key stays distinguishable from
-/// the zero value.
+/// the zero value. Skips the wrap when the field's own type already rendered
+/// as a pointer (a `Nullable` value type), so a key that is both missing in
+/// some samples and null in others doesn't become a double pointer.
 fn render_field_type(field: &Field) -> String {
     let ty = render_type(&field.ty);
 
-    if field.optional {
+    if field.optional && !ty.starts_with('*') {
         return format!("*{ty}");
     }
 

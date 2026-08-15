@@ -108,7 +108,29 @@ fn corpus() -> Vec<(&'static str, Value)> {
             "Root",
             json!({"items": [{"id": 1, "extra": null, "tags": ["a"]}, {"id": 2}]}),
         ),
+        // Nullability: a field present in every instance but null in some,
+        // and an array with a nullable item, plus map inference from
+        // all-numeric keys and from a large same-shaped property set.
+        (
+            "Root",
+            json!({
+                "pets": [{"nickname": "Mochi"}, {"nickname": null}],
+                "tags": ["a", null, "b"],
+                "scores": {"1": 10, "2": 20, "3": 30},
+            }),
+        ),
+        ("Root", many_same_shaped_properties()),
     ]
+}
+
+/// 25 numeric-valued properties, above the size threshold that turns a class
+/// into a map even without all-numeric keys.
+fn many_same_shaped_properties() -> Value {
+    let mut props = serde_json::Map::new();
+    for i in 0..25 {
+        props.insert(format!("key_{i}"), json!(i));
+    }
+    Value::Object(props)
 }
 
 #[test]

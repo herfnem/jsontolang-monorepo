@@ -61,6 +61,8 @@ fn render_type(ty: &TypeExpr) -> String {
         TypeExpr::String => "string".to_string(),
         TypeExpr::Named { name } => render_type_name(name),
         TypeExpr::Array { item } => format!("{}[]", render_type(item)),
+        TypeExpr::Map { value } => format!("{{ [key: string]: {} }}", render_type(value)),
+        TypeExpr::Nullable { of } => format!("{} | null", render_type(of)),
     }
 }
 

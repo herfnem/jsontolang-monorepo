@@ -347,6 +347,79 @@ fn renders_go_custom_json_methods_for_keys_go_tags_cannot_express() {
 }
 
 #[test]
+fn renders_go_nullable_value_types_as_pointers_and_maps() {
+    let output = rendered(
+        "go",
+        "Root",
+        json!({
+            "pets": [
+                {"nickname": "Mochi"},
+                {"nickname": null}
+            ],
+            "scores": {"1": 10, "2": 20}
+        }),
+    );
+
+    assert!(
+        output.contains("Nickname *string `json:\"nickname\"`"),
+        "{output}"
+    );
+    assert!(
+        output.contains("Scores map[string]int64 `json:\"scores\"`"),
+        "{output}"
+    );
+    assert!(!output.contains("**"), "{output}");
+}
+
+#[test]
+fn renders_rust_nullable_and_map_fields() {
+    let output = rendered(
+        "rust",
+        "Root",
+        json!({
+            "pets": [
+                {"nickname": "Mochi"},
+                {"nickname": null}
+            ],
+            "scores": {"1": 10, "2": 20}
+        }),
+    );
+
+    assert!(
+        output.starts_with(
+            "use serde::{Deserialize, Serialize};\nuse std::collections::HashMap;\n\n"
+        ),
+        "{output}"
+    );
+    assert!(output.contains("pub nickname: Option<String>,"), "{output}");
+    assert!(
+        output.contains("pub scores: HashMap<String, i64>,"),
+        "{output}"
+    );
+}
+
+#[test]
+fn renders_typescript_nullable_and_map_fields() {
+    let output = rendered(
+        "typescript",
+        "Root",
+        json!({
+            "pets": [
+                {"nickname": "Mochi"},
+                {"nickname": null}
+            ],
+            "scores": {"1": 10, "2": 20}
+        }),
+    );
+
+    assert!(output.contains("nickname: string | null;"), "{output}");
+    assert!(
+        output.contains("scores: { [key: string]: number };"),
+        "{output}"
+    );
+}
+
+#[test]
 fn renders_go_root_arrays_as_type_aliases() {
     let output = rendered("go", "Root", json!([{"id": 1}, {"id": 2, "name": "Neko"}]));
 
