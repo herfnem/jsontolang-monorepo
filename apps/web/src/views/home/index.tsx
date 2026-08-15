@@ -50,7 +50,7 @@ export const HomeView: FC<HomeViewProps> = ({ className }) => {
       </section>
 
       <section>
-        <div className="flex items-baseline justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
           <h2 className="text-2xl font-semibold tracking-tight">Try it right here</h2>
           <Link
             to="/playground"
@@ -73,9 +73,10 @@ export const HomeView: FC<HomeViewProps> = ({ className }) => {
             The playground runs the same schema inference compiled to WebAssembly. Nothing is
             uploaded; every keystroke is rendered in your browser.
           </SurfaceCard>
-          <SurfaceCard title="TUI" status="planned" icon={<SquareTerminal />}>
-            An interactive terminal front end over the same core. Not built yet — the crate layout
-            already leaves room for it.
+          <SurfaceCard title="TUI" status="available" icon={<SquareTerminal />}>
+            A two-pane vim-style editor: JSON on the left, generated types on the right,
+            re-rendered on every keystroke. hjkl navigation, insert mode, yank/paste, and system
+            clipboard copy — no mouse required.
           </SurfaceCard>
         </div>
       </section>

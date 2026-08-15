@@ -37,7 +37,12 @@ export const ActionsRail: FC<ActionsRailProps> = ({
   };
 
   return (
-    <div className={cn("flex h-full flex-col gap-3 overflow-y-auto p-4", className)}>
+    <div
+      className={cn(
+        "bg-card flex h-full flex-col justify-center gap-4 overflow-y-auto p-4",
+        className,
+      )}
+    >
       <input
         ref={fileInputRef}
         type="file"
@@ -46,24 +51,7 @@ export const ActionsRail: FC<ActionsRailProps> = ({
         onChange={handleFileChange}
       />
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <FileUp /> Upload data
-      </Button>
-
-      <Button type="button" variant="outline" className="w-full" onClick={onFormat}>
-        <Sparkles /> Format / Beautify
-      </Button>
-
-      <Button type="button" variant="outline" className="w-full" onClick={onMinify}>
-        <Minimize2 /> Minify / Compact
-      </Button>
-
-      <div className="mt-2 flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5">
         <span className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           Convert to
         </span>
@@ -75,15 +63,34 @@ export const ActionsRail: FC<ActionsRailProps> = ({
         />
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="mt-2 w-full"
-        disabled={downloadDisabled}
-        onClick={onDownload}
-      >
-        <Download /> Download
-      </Button>
+      <div className="border-border flex flex-col gap-2 border-t pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <FileUp /> Upload data
+        </Button>
+
+        <Button type="button" variant="outline" className="w-full" onClick={onFormat}>
+          <Sparkles /> Format / Beautify
+        </Button>
+
+        <Button type="button" variant="outline" className="w-full" onClick={onMinify}>
+          <Minimize2 /> Minify / Compact
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={downloadDisabled}
+          onClick={onDownload}
+        >
+          <Download /> Download
+        </Button>
+      </div>
     </div>
   );
 };
