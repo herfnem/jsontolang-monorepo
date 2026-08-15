@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-arboard = "3.6.1"
+arboard = { version = "3.6.1", features = ["wayland-data-control"] }
 jsontolang-core = { workspace = true }
 ratatui = "0.30.2"
 ratatui-textarea = "0.9.2"
