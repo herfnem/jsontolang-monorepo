@@ -1,6 +1,5 @@
 import type { FC } from "react";
 import { Link } from "@tanstack/react-router";
-import { Globe, SquareTerminal, Terminal } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { TAGLINE } from "@/libs/site";
@@ -8,7 +7,15 @@ import { CodeBlock } from "./components/code-block";
 import { LiveDemo } from "./components/live-demo";
 import { SurfaceCard } from "./components/surface-card";
 
-const BADGES = ["Rust, compiled to WebAssembly", "Nothing leaves your browser"] as const;
+const FACTS = ["Rust, compiled to WebAssembly", "Nothing leaves your browser"] as const;
+
+const CONTAINER = "mx-auto w-full max-w-5xl px-6";
+
+const SECTION_HEADING =
+  "font-display font-stretch-75% text-5xl leading-[0.9] font-extrabold tracking-[-0.03em] sm:text-7xl";
+
+const TEXT_LINK =
+  "hover:text-primary font-medium whitespace-nowrap underline decoration-2 underline-offset-4 transition-colors";
 
 interface HomeViewProps {
   className?: string;
@@ -16,81 +23,93 @@ interface HomeViewProps {
 
 export const HomeView: FC<HomeViewProps> = ({ className }) => {
   return (
-    <main className={cn("mx-auto w-full max-w-5xl px-6 pb-24", className)}>
-      <section className="relative overflow-hidden py-16 sm:py-24">
-        <div
-          aria-hidden
-          className="bg-primary/25 pointer-events-none absolute top-0 left-1/2 -z-10 size-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-        />
-
-        <div className="flex flex-wrap items-center gap-2">
-          {BADGES.map((badge) => (
-            <span
-              key={badge}
-              className="border-border text-muted-foreground rounded-full border px-3 py-1 text-xs"
-            >
-              {badge}
+    <main className={cn("w-full", className)}>
+      <section className={cn(CONTAINER, "pt-12 pb-12 sm:pt-20 sm:pb-16")}>
+        <h1 className="font-display font-stretch-75% min-w-0 text-[clamp(3rem,22vw,17rem)] leading-[0.86] font-extrabold tracking-[-0.03em] [overflow-wrap:anywhere]">
+          {TAGLINE.split(/(?<=\.)\s/).map((line, index) => (
+            <span key={line} className={cn("block", index > 0 && "text-primary")}>
+              {line}
             </span>
           ))}
-        </div>
+        </h1>
 
-        <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">{TAGLINE}</h1>
-        <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-relaxed">
-          jsontolang infers a schema from any JSON and generates matching type definitions for
-          TypeScript, Rust, Go, or a custom Lua plugin of your own. One core, three surfaces.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Button nativeButton={false} render={<Link to="/playground" />}>
-            Open the playground
-          </Button>
-          <Button nativeButton={false} variant="outline" render={<Link to="/plugins" />}>
-            Browse plugins
-          </Button>
+        <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+          <div>
+            <p className="text-muted-foreground max-w-[52ch] text-lg leading-relaxed">
+              jsontolang infers a schema from any JSON and generates matching type definitions
+              for TypeScript, Rust, Go, or a custom Lua plugin of your own. One core, three
+              surfaces.
+            </p>
+            <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              {FACTS.map((fact) => (
+                <li key={fact} className="flex items-center gap-2">
+                  <span aria-hidden className="bg-primary size-1.5 shrink-0" />
+                  {fact}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+            <Button
+              nativeButton={false}
+              render={<Link to="/playground" />}
+              className="h-12 px-6 text-base"
+            >
+              Open the playground
+            </Button>
+            <Link to="/plugins" className={cn(TEXT_LINK, "text-base")}>
+              Browse plugins
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight">Try it right here</h2>
-          <Link
-            to="/playground"
-            className="text-muted-foreground hover:text-foreground text-sm whitespace-nowrap underline-offset-4 hover:underline"
-          >
-            Open full playground →
-          </Link>
+      <section className="border-border border-t">
+        <div className={cn(CONTAINER, "py-16 sm:py-24")}>
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+            <h2 className={SECTION_HEADING}>Try it right here</h2>
+            <Link to="/playground" className={cn(TEXT_LINK, "text-sm")}>
+              Open full playground →
+            </Link>
+          </div>
+          <LiveDemo className="mt-10" />
         </div>
-        <LiveDemo className="mt-6" />
       </section>
 
-      <section className="py-16">
-        <h2 className="text-2xl font-semibold tracking-tight">Three surfaces, one core</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <SurfaceCard title="CLI" status="available" icon={<Terminal />}>
+      <section className="border-border border-t pt-16 sm:pt-24">
+        <h2 className={cn(SECTION_HEADING, CONTAINER)}>Three surfaces, one core</h2>
+        <ul className="mt-10">
+          <SurfaceCard title="CLI" status="Available">
             The full tool. Reads from a file, stdin, or an inline string, and renders through
             sandboxed Lua plugins — including any you write yourself.
           </SurfaceCard>
-          <SurfaceCard title="Web" status="you are here" icon={<Globe />} current>
+          <SurfaceCard title="Web" status="You are here" current>
             The playground runs the same schema inference compiled to WebAssembly. Nothing is
             uploaded; every keystroke is rendered in your browser.
           </SurfaceCard>
-          <SurfaceCard title="TUI" status="available" icon={<SquareTerminal />}>
+          <SurfaceCard title="TUI" status="Available">
             A two-pane vim-style editor: JSON on the left, generated types on the right,
             re-rendered on every keystroke. hjkl navigation, insert mode, yank/paste, and system
             clipboard copy — no mouse required.
           </SurfaceCard>
-        </div>
+        </ul>
       </section>
 
-      <section>
-        <h2 className="text-2xl font-semibold tracking-tight">Try it from a terminal</h2>
-        <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
-          Exactly one input source is required — <code className="font-mono">--json</code>,{" "}
-          <code className="font-mono">--file</code>, or <code className="font-mono">--stdin</code>.
-          Use <code className="font-mono">--root</code> to name the generated root type; it defaults
-          to <code className="font-mono">Root</code>.
-        </p>
-        <CodeBlock className="mt-6" label="shell">
-          {`# Inline JSON
+      <section className="bg-foreground text-background">
+        <div className={cn(CONTAINER, "grid grid-cols-1 gap-10 py-16 sm:py-24")}>
+          <div>
+            <h2 className={SECTION_HEADING}>Try it from a terminal</h2>
+            <p className="text-background/70 mt-6 max-w-[52ch] leading-relaxed">
+              Exactly one input source is required —{" "}
+              <code className="text-background font-mono">--json</code>,{" "}
+              <code className="text-background font-mono">--file</code>, or{" "}
+              <code className="text-background font-mono">--stdin</code>. Use{" "}
+              <code className="text-background font-mono">--root</code> to name the generated root
+              type; it defaults to <code className="text-background font-mono">Root</code>.
+            </p>
+          </div>
+          <CodeBlock label="shell">
+            {`# Inline JSON
 jsontolang --lang typescript --json '{"name":"Neko"}'
 
 # From a file, into Rust
@@ -98,7 +117,8 @@ jsontolang --lang rust --file ./example.json
 
 # From a pipe, into Go
 curl -s https://api.example.com/user | jsontolang --lang go --stdin`}
-        </CodeBlock>
+          </CodeBlock>
+        </div>
       </section>
     </main>
   );

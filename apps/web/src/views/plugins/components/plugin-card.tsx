@@ -13,21 +13,23 @@ export const PluginCard: FC<PluginCardProps> = ({ plugin, className }) => {
   const href = asset(`lua/${plugin.file}`);
 
   return (
-    <article className={cn("border-border bg-card flex flex-col rounded-lg border p-5", className)}>
-      <header className="flex items-baseline justify-between gap-3">
-        <h2 className="text-lg font-semibold">{plugin.title}</h2>
-        <code className="text-muted-foreground font-mono text-xs">--lang {plugin.key}</code>
+    <article className={cn("border-foreground flex flex-col border-2 p-5", className)}>
+      <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h2 className="font-display font-stretch-75% text-3xl leading-none font-extrabold tracking-[-0.03em]">
+          {plugin.title}
+        </h2>
+        <code className="text-muted-foreground font-mono text-xs whitespace-nowrap">--lang {plugin.key}</code>
       </header>
 
       <p className="text-muted-foreground mt-3 flex-1 text-sm leading-relaxed">
         {plugin.description}
       </p>
 
-      <pre className="border-border bg-background mt-4 overflow-x-auto rounded-md border p-3 font-mono text-xs leading-relaxed">
+      <pre className="border-foreground mt-4 overflow-x-auto border p-3 font-mono text-xs leading-relaxed">
         <code>{plugin.sample}</code>
       </pre>
 
-      <footer className="mt-4 flex items-center gap-3">
+      <footer className="mt-4 flex flex-wrap items-center gap-3">
         <Button
           size="sm"
           variant="outline"
@@ -38,7 +40,7 @@ export const PluginCard: FC<PluginCardProps> = ({ plugin, className }) => {
         </Button>
         <a
           href={href}
-          className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          className="hover:text-primary text-sm font-medium whitespace-nowrap underline decoration-2 underline-offset-4 transition-colors"
         >
           View source
         </a>

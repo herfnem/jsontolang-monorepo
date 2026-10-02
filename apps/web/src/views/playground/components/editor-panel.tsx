@@ -12,10 +12,8 @@ interface EditorPanelProps {
 export const EditorPanel: FC<EditorPanelProps> = ({ title, actions, children, className }) => {
   return (
     <section className={cn("flex h-full min-h-0 flex-col overflow-hidden", className)}>
-      <header className="border-border flex h-11 shrink-0 items-center justify-between gap-3 border-b px-3">
-        <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-          {title}
-        </h2>
+      <header className="border-border @container flex h-10 shrink-0 items-center justify-between gap-2 border-b px-3 lg:h-14">
+        <h2 className="sr-only">{title}</h2>
         {actions}
       </header>
       <div className="min-h-0 flex-1">{children}</div>

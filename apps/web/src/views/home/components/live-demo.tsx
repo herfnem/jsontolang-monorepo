@@ -27,10 +27,10 @@ export const LiveDemo: FC<LiveDemoProps> = ({ className }) => {
   );
 
   return (
-    <div className={cn("grid gap-4 sm:grid-cols-2", className)}>
-      <div className="border-border bg-card flex flex-col overflow-hidden rounded-lg border">
+    <div className={cn("border-foreground grid border-2 sm:grid-cols-2", className)}>
+      <div className="flex flex-col overflow-hidden">
         <div className="border-border text-muted-foreground border-b px-4 py-2 font-mono text-xs">
-          input.json <span className="text-muted-foreground/70">— edit me</span>
+          input.json <span className="text-foreground">— edit me</span>
         </div>
         <CodeEditor
           value={json}
@@ -41,7 +41,7 @@ export const LiveDemo: FC<LiveDemoProps> = ({ className }) => {
         />
       </div>
 
-      <div className="border-border bg-card flex flex-col overflow-hidden rounded-lg border">
+      <div className="border-border flex flex-col overflow-hidden border-t sm:border-t-0 sm:border-l">
         <div className="border-border text-muted-foreground border-b px-4 py-2 font-mono text-xs">
           typescript
         </div>

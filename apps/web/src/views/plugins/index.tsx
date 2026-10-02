@@ -19,7 +19,9 @@ export const PluginsView: FC<PluginsViewProps> = ({ className }) => {
   return (
     <main className={cn("mx-auto w-full max-w-5xl px-6 pb-24", className)}>
       <section className="py-12 sm:py-16">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Plugins</h1>
+        <h1 className="font-display font-stretch-75% text-6xl leading-[0.9] font-extrabold tracking-[-0.03em] sm:text-8xl">
+          Plugins
+        </h1>
         <p className="text-muted-foreground mt-4 max-w-2xl leading-relaxed">
           A jsontolang plugin is a Lua file, not Rust code. These three ship embedded in the binary,
           so the CLI works with nothing configured — but they are ordinary plugins, and you can read,
@@ -34,7 +36,9 @@ export const PluginsView: FC<PluginsViewProps> = ({ className }) => {
       </section>
 
       <section className="py-16">
-        <h2 className="text-2xl font-semibold tracking-tight">Write your own</h2>
+        <h2 className="font-display font-stretch-75% text-4xl leading-[0.9] font-extrabold tracking-[-0.03em] sm:text-6xl">
+          Write your own
+        </h2>
         <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
           Drop a <code className="font-mono">.lua</code> file into{" "}
           <code className="font-mono">~/.config/jsontolang/plugins/</code> and its{" "}
@@ -44,7 +48,7 @@ export const PluginsView: FC<PluginsViewProps> = ({ className }) => {
           <code className="font-mono">render</code> function:
         </p>
 
-        <pre className="border-border bg-card mt-6 overflow-x-auto rounded-lg border p-4 font-mono text-sm leading-relaxed">
+        <pre className="border-foreground mt-6 overflow-x-auto border-2 p-4 font-mono text-sm leading-relaxed">
           <code>{PLUGIN_CONTRACT}</code>
         </pre>
 

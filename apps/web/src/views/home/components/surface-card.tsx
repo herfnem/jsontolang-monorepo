@@ -4,7 +4,6 @@ import { cn } from "@workspace/ui/lib/utils";
 interface SurfaceCardProps {
   title: string;
   status: string;
-  icon: ReactNode;
   /** True for the surface the user is currently on. */
   current?: boolean;
   children: ReactNode;
@@ -15,41 +14,31 @@ interface SurfaceCardProps {
 export const SurfaceCard: FC<SurfaceCardProps> = ({
   title,
   status,
-  icon,
   current,
   children,
   className,
 }) => {
   return (
-    <div
-      className={cn(
-        "bg-card rounded-lg border p-5",
-        current ? "border-primary/40" : "border-border",
-        className,
-      )}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-md [&_svg]:size-4",
-              current ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-            )}
-          >
-            {icon}
-          </div>
-          <h3 className="font-semibold">{title}</h3>
-        </div>
+    <li className={cn("border-border border-t", className)}>
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-x-10 gap-y-3 px-6 py-8 md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_minmax(0,8rem)] md:items-baseline">
+        <h3
+          className={cn(
+            "font-display font-stretch-75% text-7xl leading-none font-extrabold tracking-[-0.03em] uppercase sm:text-8xl",
+            current && "text-primary",
+          )}
+        >
+          {title}
+        </h3>
+        <p className="text-muted-foreground max-w-[60ch] leading-relaxed">{children}</p>
         <span
           className={cn(
-            "font-mono text-xs",
+            "text-sm font-medium md:text-right",
             current ? "text-primary" : "text-muted-foreground",
           )}
         >
           {status}
         </span>
       </div>
-      <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{children}</p>
-    </div>
+    </li>
   );
 };

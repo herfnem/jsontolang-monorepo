@@ -1,4 +1,5 @@
 import "@workspace/ui/globals.css";
+import "@fontsource-variable/bricolage-grotesque/standard.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";

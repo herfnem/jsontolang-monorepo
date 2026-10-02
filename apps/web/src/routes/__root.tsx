@@ -1,6 +1,8 @@
-import { createRootRoute, HeadContent, Outlet } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { cn } from "@workspace/ui/lib/utils";
+import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { canonical, SITE_NAME } from "@/libs/site";
 
@@ -25,12 +27,21 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
+  const matchRoute = useMatchRoute();
+  const isPlayground = Boolean(matchRoute({ to: "/playground" }));
+
   return (
     <div className="flex h-svh flex-col overflow-hidden">
       <HeadContent />
-      <Nav />
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <Nav className={cn(isPlayground && "lg:hidden")} />
+      <div
+        className={cn(
+          "min-h-0 flex-1 overscroll-none",
+          isPlayground ? "overflow-hidden" : "overflow-y-auto",
+        )}
+      >
         <Outlet />
+        {!isPlayground && <Footer />}
       </div>
       <TanStackDevtools
         plugins={[
